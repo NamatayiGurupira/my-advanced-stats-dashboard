@@ -1,0 +1,29 @@
+# CODEOWNERS — Automatic Reviewer Assignment
+#
+# This file tells GitHub to automatically request a review from the listed
+# people whenever a pull request changes the specified files.
+#
+# This is how you enforce governance: critical scripts cannot be merged
+# without sign-off from a senior analyst. Quality and continuity, not policing!
+#
+# Format: <file pattern>  <@github-username or @org/team>
+#
+# ── Instructions ─────────────────────────────────────────────────────────────
+# Replace @YOUR-GITHUB-USERNAME with your actual GitHub username.
+# For team accounts, use @your-org/your-team-name.
+# Commit this file to .github/CODEOWNERS for it to take effect.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Default owner for everything in the repository
+* @YOUR-GITHUB-USERNAME
+
+# The workshop notebook and any data scripts require senior review
+# (these are the files most likely to contain sensitive queries or data)
+/workshop/ @YOUR-GITHUB-USERNAME
+
+# The live dashboard — requires sign-off before it goes public
+/docs/ @YOUR-GITHUB-USERNAME
+
+# CI/CD and configuration — only trusted admins should change these
+/.github/ @YOUR-GITHUB-USERNAME
+/.pre-commit-config.yaml @YOUR-GITHUB-USERNAME

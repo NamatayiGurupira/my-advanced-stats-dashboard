@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stats Wales Dashboard</title>
+  <style>
+    /* ── Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f6f8;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #007C45 0%, #005a32 100%);
+      color: #fff;
+      padding: 2rem 1.5rem 1.5rem;
+      text-align: center;
+    }
+
+    header .flag { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+    header h1 {
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      opacity: 0.85;
+      font-size: 1rem;
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Controls ── */
+    .controls {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input[type="text"], select {
+      padding: 0.6rem 0.8rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    input[type="text"]:focus, select:focus {
+      outline: none;
+      border-color: #007C45;
+    }
+
+    button {
+      background: #007C45;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.4rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    button:hover { background: #005a32; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:disabled { background: #aaa; cursor: not-allowed; transform: none; }
+
+    /* ── Cards grid ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      border-left: 4px solid #007C45;
+    }
+
+    .stat-card .label { font-size: 0.8rem; color: #777; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-card .value { font-size: 2rem; font-weight: 700; color: #007C45; margin-top: 0.3rem; }
+    .stat-card .sub   { font-size: 0.8rem; color: #999; margin-top: 0.2rem; }
+
+    /* ── Chart card ── */
+    .chart-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    #chart-container {
+      position: relative;
+      height: 380px;
+    }
+
+    /* ── Table card ── */
+    .table-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .table-card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .table-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead th {
+      background: #f0f5f2;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #555;
+      border-bottom: 2px solid #d4e8dc;
+    }
+
+    tbody tr:nth-child(even) { background: #fafcfb; }
+
+    tbody td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid #eef2f0;
+      vertical-align: middle;
+    }
+
+    /* ── Status / loading ── */
+    #status {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.95rem;
+      color: #555;
+      font-style: italic;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid #cde8d9;
+      border-top-color: #007C45;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.8rem;
+      color: #999;
+    }
+
+    footer a { color: #007C45; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .controls { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="flag">🏴󠁧󠁢󠁷󠁬󠁳󠁿</div>
+    <h1>Stats Wales Open Data Dashboard</h1>
+    <p>Built with GitHub Codespaces &amp; Copilot · Advanced Workshop · Hosted on GitHub Pages</p>
+  </header>
+
+  <main>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="control-group" style="flex: 2; min-width: 260px;">
+        <label for="dataset-id">Dataset ID</label>
+        <input
+          type="text"
+          id="dataset-id"
+          placeholder="e.g. 0ff18b56-0a4f-4ac3-a198-197aa48cc9e1"
+          value="0ff18b56-0a4f-4ac3-a198-197aa48cc9e1"
+        />
+      </div>
+      <div class="control-group">
+        <label for="area-filter">Area</label>
+        <input type="text" id="area-filter" placeholder="e.g. Wales" value="Wales" />
+      </div>
+      <div class="control-group">
+        <label for="year-filter">Year</label>
+        <input type="text" id="year-filter" placeholder="e.g. 2020" value="2020" />
+      </div>
+      <div class="control-group">
+        <label for="chart-type">Chart Type</label>
+        <select id="chart-type">
+          <option value="bar">Bar Chart</option>
+          <option value="line">Line Chart</option>
+          <option value="doughnut">Doughnut</option>
+        </select>
+      </div>
+      <button id="load-btn" onclick="loadData()">Load Data</button>
+    </div>
+
+    <!-- Status -->
+    <div id="status">Enter a Dataset ID and click <strong>Load Data</strong> to begin.</div>
+
+    <!-- Summary cards -->
+    <div class="card-grid" id="summary-cards" style="display:none;"></div>
+
+    <!-- Chart -->
+    <div class="chart-card" id="chart-card" style="display:none;">
+      <h2 id="chart-title">Chart</h2>
+      <div id="chart-container">
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Data table -->
+    <div class="table-card" id="table-card" style="display:none;">
+      <h2>Data Table</h2>
+      <div class="table-scroll">
+        <table id="data-table">
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>
+      Data source: <a href="https://statswales.gov.wales" target="_blank" rel="noopener noreferrer">Stats Wales</a>
+      &nbsp;·&nbsp;
+      <a href="https://api.stats.gov.wales/v1/?lang=en-gb&page_number=1&page_size=100" target="_blank" rel="noopener noreferrer">Browse all datasets</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+    </p>
+    <p style="margin-top:0.4rem;">Built during the Big Data Does GitHub Workshop 🏴󠁧󠁢󠁷󠁬󠁳󠁿</p>
+  </footer>
+
+  <!-- Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <script>
+    let chartInstance = null;
+
+    // Welsh Government brand colours
+    const COLOURS = [
+      "#007C45", "#D40000", "#1f77b4", "#ff7f0e",
+      "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#17becf"
+    ];
+
+    function setStatus(msg, loading = false) {
+      const el = document.getElementById("status");
+      el.innerHTML = loading
+        ? `<span class="spinner"></span>${msg}`
+        : msg;
+    }
+
+    function buildApiUrl(datasetId, area, year) {
+      const sortBy = JSON.stringify([
+        { columnName: "Year", direction: "ASC" },
+        { columnName: "Measure", direction: "DESC" }
+      ]);
+
+      const filters = [];
+      if (area.trim()) filters.push({ columnName: "Area", values: [area.trim()] });
+      if (year.trim()) filters.push({ columnName: "Year", values: [year.trim()] });
+
+      const params = new URLSearchParams({
+        lang: "en-gb",
+        page_number: 1,
+        page_size: 100,
+        sort_by: sortBy,
+        ...(filters.length && { filter: JSON.stringify(filters) })
+      });
+
+      return `https://api.stats.gov.wales/v1/${datasetId.trim()}/view?${params}`;
+    }
+
+    async function loadData() {
+      const datasetId = document.getElementById("dataset-id").value.trim();
+      const area      = document.getElementById("area-filter").value;
+      const year      = document.getElementById("year-filter").value;
+      const btn       = document.getElementById("load-btn");
+
+      if (!datasetId) { setStatus("⚠️ Please enter a Dataset ID."); return; }
+
+      btn.disabled = true;
+      setStatus("Fetching data from Stats Wales API…", true);
+
+      // Hide previous results
+      ["summary-cards","chart-card","table-card"].forEach(id => {
+        document.getElementById(id).style.display = "none";
+      });
+
+      try {
+        const url = buildApiUrl(datasetId, area, year);
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`API returned ${response.status}: ${response.statusText}`);
+        }
+
+        const json = await response.json();
+        const rows = Array.isArray(json) ? json : (json.value || json.items || []);
+
+        if (!rows.length) {
+          setStatus("⚠️ No data returned. Try adjusting the filters.");
+          return;
+        }
+
+        setStatus(`✅ Loaded ${rows.length} records from Stats Wales.`);
+        renderSummaryCards(rows);
+        renderChart(rows);
+        renderTable(rows);
+
+      } catch (err) {
+        setStatus(`❌ Error: ${err.message}. Check the Dataset ID and try again.`);
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderSummaryCards(rows) {
+      const container = document.getElementById("summary-cards");
+      const cols = Object.keys(rows[0]);
+
+      // Find numeric columns for summary stats
+      const numericCols = cols.filter(c =>
+        rows.some(r => typeof r[c] === "number" || !isNaN(parseFloat(r[c])))
+      );
+
+      const cards = [
+        { label: "Total Records", value: rows.length, sub: "rows returned" },
+        { label: "Columns", value: cols.length, sub: "data fields" },
+      ];
+
+      if (numericCols.length) {
+        const col = numericCols[0];
+        const nums = rows.map(r => parseFloat(r[col])).filter(n => !isNaN(n));
+        const total = nums.reduce((a, b) => a + b, 0);
+        cards.push({
+          label: `Total (${col})`,
+          value: total.toLocaleString("en-GB", { maximumFractionDigits: 1 }),
+          sub: col
+        });
+        cards.push({
+          label: `Average (${col})`,
+          value: (total / nums.length).toLocaleString("en-GB", { maximumFractionDigits: 1 }),
+          sub: "mean"
+        });
+      }
+
+      container.innerHTML = cards.map(c => `
+        <div class="stat-card">
+          <div class="label">${c.label}</div>
+          <div class="value">${c.value}</div>
+          <div class="sub">${c.sub}</div>
+        </div>
+      `).join("");
+
+      container.style.display = "grid";
+    }
+
+    function renderChart(rows) {
+      const chartType = document.getElementById("chart-type").value;
+      const cols = Object.keys(rows[0]);
+
+      // Heuristic: first string-ish column = labels, first numeric column = values
+      const labelCol = cols.find(c => typeof rows[0][c] === "string") || cols[0];
+      const valueCol = cols.find(c => !isNaN(parseFloat(rows[0][c])) && c !== labelCol) || cols[1];
+
+      const labels = rows.map(r => String(r[labelCol]));
+      const values = rows.map(r => parseFloat(r[valueCol]) || 0);
+
+      document.getElementById("chart-title").textContent =
+        `${valueCol} by ${labelCol}`;
+
+      const ctx = document.getElementById("myChart").getContext("2d");
+
+      if (chartInstance) { chartInstance.destroy(); }
+
+      chartInstance = new Chart(ctx, {
+        type: chartType,
+        data: {
+          labels,
+          datasets: [{
+            label: valueCol,
+            data: values,
+            backgroundColor: chartType === "line"
+              ? "rgba(0, 124, 69, 0.15)"
+              : labels.map((_, i) => COLOURS[i % COLOURS.length]),
+            borderColor: chartType === "line"
+              ? "#007C45"
+              : labels.map((_, i) => COLOURS[i % COLOURS.length]),
+            borderWidth: chartType === "line" ? 2 : 1,
+            fill: chartType === "line",
+            tension: 0.4,
+            pointBackgroundColor: "#007C45"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: chartType !== "bar" },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const val = typeof ctx.parsed === "object" ? ctx.parsed.y : ctx.parsed;
+                  return ` ${(val ?? 0).toLocaleString("en-GB")}`;
+                }
+              }
+            }
+          },
+          scales: ["bar","line"].includes(chartType) ? {
+            y: {
+              beginAtZero: true,
+              ticks: { callback: v => v.toLocaleString("en-GB") }
+            }
+          } : undefined
+        }
+      });
+
+      document.getElementById("chart-card").style.display = "block";
+    }
+
+    function renderTable(rows) {
+      const cols = Object.keys(rows[0]);
+
+      document.getElementById("table-head").innerHTML =
+        `<tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr>`;
+
+      document.getElementById("table-body").innerHTML =
+        rows.map(r =>
+          `<tr>${cols.map(c => `<td>${r[c] ?? ""}</td>`).join("")}</tr>`
+        ).join("");
+
+      document.getElementById("table-card").style.display = "block";
+    }
+
+    // Auto-load if ?dataset= is in the URL (handy for sharing links)
+    window.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const ds = params.get("dataset");
+      if (ds) {
+        document.getElementById("dataset-id").value = ds;
+        loadData();
+      }
+    });
+  </script>
+
+</body>
+</html>

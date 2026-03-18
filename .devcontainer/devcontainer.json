@@ -1,0 +1,52 @@
+{
+  "name": "Stats Wales Advanced Workshop",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "esbenp.prettier-vscode",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+          }
+        },
+        "notebook.lineNumbers": "on",
+        "github.copilot.enable": {
+          "*": true
+        }
+      }
+    }
+  },
+  "postCreateCommand": "pip install requests pandas matplotlib plotly notebook ipykernel ruff nbstripout pre-commit && pre-commit install",
+  "remoteUser": "vscode",
+  "forwardPorts": [8888, 8080],
+  "portsAttributes": {
+    "8888": {
+      "label": "Jupyter Notebook",
+      "onAutoForward": "openBrowser"
+    },
+    "8080": {
+      "label": "Dashboard Preview",
+      "onAutoForward": "notify"
+    }
+  }
+}

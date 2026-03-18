@@ -1,0 +1,19 @@
+repos:
+  # Strip Jupyter Notebook outputs and metadata before committing
+  # This prevents accidental leaks of data, API keys, or messy output cells
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
+        name: Strip notebook outputs (nbstripout)
+
+  # Ruff: fast Python linter and formatter
+  # Catches common errors and enforces consistent code style automatically
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.7
+    hooks:
+      - id: ruff
+        name: Lint with Ruff
+        args: [--fix]
+      - id: ruff-format
+        name: Format with Ruff
