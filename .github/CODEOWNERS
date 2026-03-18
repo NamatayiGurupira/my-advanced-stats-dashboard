@@ -15,15 +15,15 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Default owner for everything in the repository
-* @YOUR-GITHUB-USERNAME
+* @NamatayiGurupira
 
 # The workshop notebook and any data scripts require senior review
 # (these are the files most likely to contain sensitive queries or data)
-/workshop/ @YOUR-GITHUB-USERNAME
+/workshop/ @NamatayiGurupira
 
 # The live dashboard — requires sign-off before it goes public
-/docs/ @YOUR-GITHUB-USERNAME
+/docs/ @NamatayiGurupira
 
 # CI/CD and configuration — only trusted admins should change these
-/.github/ @YOUR-GITHUB-USERNAME
-/.pre-commit-config.yaml @YOUR-GITHUB-USERNAME
+/.github/ @NamatayiGurupira
+/.pre-commit-config.yaml @NamatayiGurupira
