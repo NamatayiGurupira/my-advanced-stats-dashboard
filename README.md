@@ -1,4 +1,4 @@
-# From Repo to Dashboard: Advanced Governance 🏴󠁧󠁢󠁷󠁬󠁳󠁿
+# From Repo to Dashboard: Advanced Governance 🏴󠁧󠁢󠁷󠁬󠁳󠁿 (Namatayi)
 
 ## Automated Testing, CI/CD Deployment & Team Governance for Data Analysts
 
